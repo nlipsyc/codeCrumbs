@@ -44,15 +44,27 @@ function init() {
 	};
 	stage.addChild(bot);
 
-	goTime = new createjs.Shape();
-	goTime.graphics.beginFill("green").dc(0, 0, UNIT.width);
-	goTime.x = STAGE.width - UNIT.height;
-	goTime.y = UNIT.height;
-	goTime.progRunning = false;
+	goLabel = new createjs.Text("Go Time!", "bold 18px Arial", "#FFFFFF");
+			goLabel.name = "goLabel";
+			goLabel	.textAlign = "center";
+			goLabel	.textBaseline = "middle";
+			goLabel	.x = UNIT.x;
+			goLabel	.y = UNIT.y;
+		
+	goBkg = new createjs.Shape();
+			goBkg.graphics.beginFill("green").dc(0, 0, UNIT.width);
+			
+	
+	goTime = new createjs.Container();
+			goTime.name = "goTime";
+			goTime.x = STAGE.width - UNIT.height;
+			goTime.y = UNIT.height;
+			goTime.progRunning = false;
+			goTime.addChild(goBkg, goLabel);
 	stage.addChild(goTime);
+
 	// line = new createjs.Shape();
 	// stage.addChild(line);
-
 	stage.update();
 
 	//Listeners
