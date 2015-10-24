@@ -22,40 +22,6 @@ var STAGE = {
 	stage, bot,
 	ticker = createjs.Ticker;
 
-//Classes
-	(function(){
-	function BCrumb(label, fn){
-		this.Container_constructor();
-		this.label = label;
-		this.fn = fn;
-		this.on("pressmove", function(evt) {
-				var snapped = handleSnap(evt.stageX, evt.stageY);
-
-				evt.currentTarget.x = snapped.x;
-				evt.currentTarget.y = snapped.y;
-
-				});
-
-		this.setup();
-		console.log("l", label, "f", fn);
-		}
-	var b = createjs.extend(BCrumb, createjs.Container);
-
-	b.setup = function(){
-		var bcBkg = new createjs.Shape();
-			bcBkg.graphics.beginFill("#234567").dc(0,0, UNIT.width*0.4);
-
-		var bcLabel = new createjs.Text(this.label, "bold 18px Arial", "#FFFFFF");
-			bcLabel.name = this.label;
-			bcLabel.textAlign = "center";
-			textBaseline = "center";
-
-		this.addChild(bcBkg, bcLabel);
-	};
-
-		window.BCrumb = createjs.promote(BCrumb, "Container");
-	}());
-
 	//Handlers
 
 	function handleSnap(cursorX, cursorY) { //Returns object {x: new x point, y: new y point}
@@ -66,48 +32,30 @@ var STAGE = {
 				console.log({x: xSnapped, y: ySnapped});
 			return {x: xSnapped, y: ySnapped}; //Return x,y snapped to closest unit
 		}
-						console.log("2", {x: xSnapped, y: ySnapped});
-
+						
 		return {x: cursorX, y: cursorY}; // If we are not in the playground, allow the breadcrumb to move freely
 	}
 
-	function handleMoveForward(dist, ori){
+	function handleMoveForward(dist, ori, x, y){ //Returns {newX: new X, newY: new Y}
 		switch (ori){
 			case "e":
-				bot.x += dist;
-				break;
-
+				return {newX: x += dist, newY: y};
+			
 			case "s":
-				bot.y += dist;
-				break;
-
+				return {newX: x, newY: y += dist};
+				
 			case "w":
-				bot.x -= dist;
-				break;
+				return {newX: x -= dist, newY: y};
 
 			case "n":
-				bot.y -= dist;
-				break;
+				return{newX: x, newY: y -= dist};
 
 			default:
-				console.log("Error: Bot has invalid orientation property");
+				console.log("Error: Bot has invalid or no orientation property");
 
 		}
 			}
 
-	function handleGoTime() {
-		if (!goTime.progRunning) { //We start the program
-			bot.moving = true;
-		} else { //We end the program and reset the field
-			bot.moving = false;
-			setTimeout(function() {			
-			bot.x = bot.defaultPos.x;
-			bot.y = bot.defaultPos.y;}, 
-			250);
-		}
-
-		goTime.progRunning = !goTime.progRunning;
-	}
 
 function init() {
 	stage = new createjs.Stage("demoCanvas");
@@ -125,7 +73,10 @@ function init() {
 	bot.orientation = "e";
 	bot.moving = false;
 	bot.moveForward = function(dist) {
-		handleMoveForward(dist, bot.orientation);
+
+		var newPos = handleMoveForward(dist, bot.orientation, bot.x, bot.y);
+		bot.x = newPos.newX;
+		bot.y = newPos.newY;
 
 	};
 	stage.addChild(bot);
@@ -152,6 +103,22 @@ function init() {
 	// line = new createjs.Shape();
 	// stage.addChild(line);
 	stage.update();
+
+		function handleGoTime() {
+
+		if (!goTime.progRunning) { //We start the program
+			bot.moving = true;
+		} else { //We end the program and reset the field
+			bot.moving = false;
+			setTimeout(function() {			
+			bot.x = bot.defaultPos.x;
+			bot.y = bot.defaultPos.y;}, 
+			250);
+		}
+
+		goTime.progRunning = !goTime.progRunning;
+		console.log("handling", "bot", bot);
+	}
 
 	(function(){
 
@@ -183,14 +150,18 @@ console.log("stage", stage.children);
 			ticker.addEventListener("tick", tick);
 		
 	stage.update();
+
+	/***********Animation************/
+	function tick(event) {
+		//ms since last tick / ms per s * px per sec
+		if(bot.moving && bot.x<STAGE.width-UNIT.width){
+			bot.moveForward(event.delta / 1000 * 200);
+		}	
+	stage.update();
+	}
 }	
 
-/***********Animation************/
-function tick(event) {
-	//ms since last tick / ms per s * px per sec
-	// if(bot.moving && bot.x<STAGE.width-UNIT.width){
-	// 	bot.moveForward(event.delta / 1000 * 200);
-	// }	
+
 
 
 	//Hit test
@@ -205,5 +176,4 @@ function tick(event) {
 	// 	circle.alpha = 0.5;
 	// }
 
-	stage.update();
-}
+	
