@@ -29,7 +29,6 @@ var STAGE = {
 			var xSnapped = Math.round((cursorX - UNIT.width / 2) / UNIT.width) * UNIT.width; //Snaps to closest gird point.
 		
 			var ySnapped = Math.round((cursorY - UNIT.height / 2) / UNIT.height) * UNIT.height; //Snaps to closest gird point.
-				console.log({x: xSnapped, y: ySnapped});
 			return {x: xSnapped, y: ySnapped}; //Return x,y snapped to closest unit
 		}
 						
@@ -56,6 +55,27 @@ var STAGE = {
 		}
 			}
 
+	function isOnStage(shape){ //runs checks for each boundry and logs failure
+		if (shape.x > STAGE.width-UNIT.width){
+			console.log("Right edge hit");
+			return false;
+		}
+		else if(shape.x < CONTROLPANEL + UNIT.width){
+			console.log("Left edge hit");
+			return false;
+		}
+		else if (shape.y < UNIT.height){
+			console.log("Bottom edge hit");
+			return false;
+		}
+		else if (shape.y > STAGE.height - UNIT.height){
+			console.log("Top edge hit");
+			return false;
+		}
+		else{
+			return true;
+		}
+	}
 
 function init() {
 	stage = new createjs.Stage("demoCanvas");
@@ -110,32 +130,39 @@ function init() {
 			bot.moving = true;
 		} else { //We end the program and reset the field
 			bot.moving = false;
-			setTimeout(function() {			
+			setTimeout(function() {
 			bot.x = bot.defaultPos.x;
-			bot.y = bot.defaultPos.y;}, 
+			bot.y = bot.defaultPos.y;
+			bot.orientation = "e";
+			},
 			250);
 		}
 
 		goTime.progRunning = !goTime.progRunning;
-		console.log("handling", "bot", bot);
 	}
+
+		var bCrumbs = new createjs.Container();
+			bCrumbs.name = "bCrumbs";
+			stage.addChild(bCrumbs);
+			console.log(bCrumbs);
 
 	(function(){
 
 				var cols = 2;
 				var rows = 4;
+				var l = 8;
+				var fns = ["n", "e", "s", "w"];
 
-				for(var i=0;i<8;i++) {
-				var bCrumb = new BCrumb(i, "Foo");
+				for(var i=0; i<l; i++) {
+				var myFn = fns[i % fns.length];
+				var bCrumb = new BCrumb(i + "-" + myFn, myFn); //(label, fn)
 					bCrumb.x = UNIT.width + UNIT.width * (i % cols);
 					bCrumb.y = UNIT.height + UNIT.height*Math.floor((i)/cols);
-			  	console.log(bCrumb.x, bCrumb.y);
-			    stage.addChild(bCrumb);
+				    bCrumbs.addChild(bCrumb);
 				}
-			    stage.update();
+				stage.update();
 			})();
 	//Listeners
-console.log("stage", stage.children);
 	// BCrumb.on("pressmove", function(evt) {
 	// 			evt.currentTarget.x = handleXSnap(evt.stageX);
 	// 			evt.currentTarget.y = handleYSnap(evt.stageY);
@@ -154,26 +181,29 @@ console.log("stage", stage.children);
 	/***********Animation************/
 	function tick(event) {
 		//ms since last tick / ms per s * px per sec
-		if(bot.moving && bot.x<STAGE.width-UNIT.width){
+		if(bot.moving && isOnStage(bot)){
 			bot.moveForward(event.delta / 1000 * 200);
-		}	
-	stage.update();
+		}
+		
+
+		//Has bot hit a bCrumb?
+		var l = bCrumbs.getNumChildren(); //Get number of bCrumbs
+		for (var i=0; i<l; i++){
+			var child = bCrumbs.getChildAt(i); //For each bC
+
+			var pt = child.localToLocal(UNIT.width*0.2, UNIT.height*0.2, bot); //Does a point in the middle of the bC hit the bot?
+				
+				if (child.hitTest(pt.x, pt.y)){
+					bot.orientation = child.fn;
+					console.log("hit!!!!!");
+				}
+		}
+		stage.update();
 	}
-}	
+}
 
 
 
 
-	//Hit test
-
-	// var pt = square.localToLocal(12, 12, circle);
-
-	// console.log("square", pt.x, pt.y);
-	// console.log("circle", circle.x, circle.y);
-
-	// if (circle.hitTest(pt.x, pt.y)){
-	// 	console.log('hit');
-	// 	circle.alpha = 0.5;
-	// }
 
 	
