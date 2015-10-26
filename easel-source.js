@@ -75,7 +75,7 @@ var STAGE = {
 		else{
 			return true;
 		}
-	}
+}
 
 function init() {
 	stage = new createjs.Stage("demoCanvas");
@@ -99,6 +99,13 @@ function init() {
 		bot.y = newPos.newY;
 
 	};
+	bot.handleBCrumbFunction = 	function handleBCrumbFunction(fn, value){
+		if (fn === "setOrientation"){
+				this.orientation = value;
+			}
+			else {console.log("No orientation given!");}
+	}
+
 	stage.addChild(bot);
 
 	var goLabel = new createjs.Text("Go Time!", "bold 18px Arial", "#FFFFFF");
@@ -134,6 +141,7 @@ function init() {
 			bot.x = bot.defaultPos.x;
 			bot.y = bot.defaultPos.y;
 			bot.orientation = "e";
+			bot.currentFunction = null;
 			},
 			250);
 		}
@@ -151,14 +159,22 @@ function init() {
 				var cols = 2;
 				var rows = 4;
 				var l = 8;
-				var fns = ["n", "e", "s", "w"];
+				var fns =  [["setOrientation", "n"], 
+							["setOrientation", "e"],
+							["setOrientation", "s"],
+							["setOrientation", "w"]
+							];
+
+				var labels = ["n", "e", "s", "w"];
 
 				for(var i=0; i<l; i++) {
 				var myFn = fns[i % fns.length];
-				var bCrumb = new BCrumb(i + "-" + myFn, myFn); //(label, fn)
+				var myLabel = labels[i % labels.length];
+
+				var bCrumb = new BCrumb(myLabel, myFn); //(label, fn)
 					bCrumb.x = UNIT.width + UNIT.width * (i % cols);
 					bCrumb.y = UNIT.height + UNIT.height*Math.floor((i)/cols);
-				    bCrumbs.addChild(bCrumb);
+					bCrumbs.addChild(bCrumb);
 				}
 				stage.update();
 			})();
@@ -194,7 +210,9 @@ function init() {
 			var pt = child.localToLocal(UNIT.width*0.2, UNIT.height*0.2, bot); //Does a point in the middle of the bC hit the bot?
 				
 				if (child.hitTest(pt.x, pt.y)){
-					bot.orientation = child.fn;
+					bot.handleBCrumbFunction(child.fn[0], child.fn[1]);
+					console.log("currentFn", child.fn);
+
 					console.log("hit!!!!!");
 				}
 		}

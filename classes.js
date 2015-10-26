@@ -4,12 +4,12 @@
 		this.label = label;
 		this.fn = fn;
 		this.on("pressmove", function(evt) {
-				var snapped = handleSnap(evt.stageX, evt.stageY);
-
+			var snapped = handleSnap(evt.stageX, evt.stageY);
+			//	if (!goTime.progRunning){ ******Need to lock this so it only happens when game is paused****
 				evt.currentTarget.x = snapped.x;
 				evt.currentTarget.y = snapped.y;
-
-				});
+			//	}
+			});
 
 		this.setup();
 		}
