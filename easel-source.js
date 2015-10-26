@@ -35,25 +35,7 @@ var STAGE = {
 		return {x: cursorX, y: cursorY}; // If we are not in the playground, allow the breadcrumb to move freely
 	}
 
-	function handleMoveForward(dist, ori, x, y){ //Returns {newX: new X, newY: new Y}
-		switch (ori){
-			case "e":
-				return {newX: x += dist, newY: y};
-			
-			case "s":
-				return {newX: x, newY: y += dist};
-				
-			case "w":
-				return {newX: x -= dist, newY: y};
 
-			case "n":
-				return{newX: x, newY: y -= dist};
-
-			default:
-				console.log("Error: Bot has invalid or no orientation property");
-
-		}
-			}
 
 	function isOnStage(shape){ //runs checks for each boundry and logs failure
 		if (shape.x > STAGE.width-UNIT.width){
@@ -75,7 +57,10 @@ var STAGE = {
 		else{
 			return true;
 		}
-}
+	}
+
+
+		
 
 function init() {
 	stage = new createjs.Stage("demoCanvas");
@@ -84,6 +69,46 @@ function init() {
 	stage.mouseMoveOutside = true;
 
 	stage.enableMouseOver();
+
+	function handleMoveForward(dist, ori, x, y){ //Returns {newX: new X, newY: new Y}
+	switch (ori){
+		case "e":
+			return {newX: x += dist, newY: y};
+		
+		case "s":
+			return {newX: x, newY: y += dist};
+			
+		case "w":
+			return {newX: x -= dist, newY: y};
+
+		case "n":
+			return{newX: x, newY: y -= dist};
+
+		default:
+			console.log("Error: Bot has invalid or no orientation property");
+		}
+	}
+
+	function resetBCrumb(bCrumb){
+		bCrumb.x = bCrumb.defaultPos.x;
+		bCrumb.y = bCrumb.defaultPos.y;
+	}
+
+
+	function resetPlayground(){
+	//Reset bCrumb position
+		var l = bCrumbs.getNumChildren(); //Get number of bCrumbs
+		for (var i=0; i<l; i++){
+			var bC = bCrumbs.getChildAt(i); //For each bC
+			resetBCrumb(bC);
+			}
+	//Reset bot position and stats
+		bot.moving = false;
+		bot.x = bot.defaultPos.x;
+		bot.y = bot.defaultPos.y;
+		bot.orientation = "e";
+		bot.currentFunction = null;
+	}
 
 	var bot = new createjs.Shape();
 	bot.graphics.beginFill("gray").drawRoundRect(0, 0, UNIT.width * 0.8, UNIT.height * 0.8, 5);
@@ -99,12 +124,14 @@ function init() {
 		bot.y = newPos.newY;
 
 	};
-	bot.handleBCrumbFunction = 	function handleBCrumbFunction(fn, value){
-		if (fn === "setOrientation"){
-				this.orientation = value;
-			}
-			else {console.log("No orientation given!");}
-	}
+	bot.handleBCrumbFunction = function handleBCrumbFunction(fn, value){
+		if(bot.moving){ //Make sure the game is running
+			if (fn === "setOrientation"){
+					this.orientation = value;
+				}
+				else {console.log("No orientation given!");}
+		}
+	};
 
 	stage.addChild(bot);
 
@@ -136,12 +163,8 @@ function init() {
 		if (!goTime.progRunning) { //We start the program
 			bot.moving = true;
 		} else { //We end the program and reset the field
-			bot.moving = false;
 			setTimeout(function() {
-			bot.x = bot.defaultPos.x;
-			bot.y = bot.defaultPos.y;
-			bot.orientation = "e";
-			bot.currentFunction = null;
+			resetPlayground();
 			},
 			250);
 		}
@@ -155,6 +178,8 @@ function init() {
 			console.log(bCrumbs);
 
 	(function(){
+
+//Generation of bCrumbs
 
 				var cols = 2;
 				var rows = 4;
@@ -171,11 +196,16 @@ function init() {
 				var myFn = fns[i % fns.length];
 				var myLabel = labels[i % labels.length];
 
-				var bCrumb = new BCrumb(myLabel, myFn); //(label, fn)
+				var bCrumb = new BCrumb(myLabel, myFn, false); //(label, fn)
 					bCrumb.x = UNIT.width + UNIT.width * (i % cols);
 					bCrumb.y = UNIT.height + UNIT.height*Math.floor((i)/cols);
+					bCrumb.defaultPos = {x: bCrumb.x, y: bCrumb.y};
 					bCrumbs.addChild(bCrumb);
 				}
+
+//Generation of gold
+
+				
 				stage.update();
 			})();
 	//Listeners
@@ -205,14 +235,16 @@ function init() {
 		//Has bot hit a bCrumb?
 		var l = bCrumbs.getNumChildren(); //Get number of bCrumbs
 		for (var i=0; i<l; i++){
-			var child = bCrumbs.getChildAt(i); //For each bC
+			var hitBCrumb = bCrumbs.getChildAt(i); //For each bC
 
-			var pt = child.localToLocal(UNIT.width*0.2, UNIT.height*0.2, bot); //Does a point in the middle of the bC hit the bot?
+			var pt = hitBCrumb.localToLocal(UNIT.width*0.2, UNIT.height*0.2, bot); //Does a point in the middle of the bC hit the bot?
 				
-				if (child.hitTest(pt.x, pt.y)){
-					bot.handleBCrumbFunction(child.fn[0], child.fn[1]);
-					console.log("currentFn", child.fn);
-
+				if (hitBCrumb.hitTest(pt.x, pt.y)){
+					bot.handleBCrumbFunction(hitBCrumb.fn[0], hitBCrumb.fn[1]);
+					console.log("currentFn", hitBCrumb.fn);
+					if (hitBCrumb.persistent === false){
+						resetBCrumb(hitBCrumb);
+					}
 					console.log("hit!!!!!");
 				}
 		}
