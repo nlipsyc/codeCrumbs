@@ -1,8 +1,9 @@
 (function(){
-	function BCrumb(label, fn){
+	function BCrumb(label, fn, persistent){
 		this.Container_constructor();
 		this.label = label;
 		this.fn = fn;
+		this.persistent = persistent;
 		this.on("pressmove", function(evt) {
 			var snapped = handleSnap(evt.stageX, evt.stageY);
 			//	if (!goTime.progRunning){ ******Need to lock this so it only happens when game is paused****

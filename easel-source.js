@@ -37,7 +37,7 @@ var STAGE = {
 
 
 
-	function isOnStage(shape){ //runs checks for each boundry and logs failure
+	function isOnStage(shape){ //runs checks for each boundary and logs failure
 		if (shape.x > STAGE.width-UNIT.width){
 			console.log("Right edge hit");
 			return false;
@@ -101,13 +101,18 @@ function init() {
 		for (var i=0; i<l; i++){
 			var bC = bCrumbs.getChildAt(i); //For each bC
 			resetBCrumb(bC);
+			bC.visible = true;
 			}
 	//Reset bot position and stats
 		bot.moving = false;
 		bot.x = bot.defaultPos.x;
 		bot.y = bot.defaultPos.y;
+		bot.inventory = [];
+		bot.inventoryCap = 2;
+		bot.bucks = 0;
 		bot.orientation = "e";
 		bot.currentFunction = null;
+		bot
 	}
 
 	var bot = new createjs.Shape();
@@ -115,6 +120,9 @@ function init() {
 	bot.defaultPos = {x: CONTROLPANEL.width, y: STAGE.height - UNIT.height};
 	bot.x = bot.defaultPos.x;
 	bot.y = bot.defaultPos.y;
+	bot.inventory = [];
+	bot.inventoryCap = 2;
+	bot.bucks = 0;
 	bot.orientation = "e";
 	bot.moving = false;
 	bot.moveForward = function(dist) {
@@ -124,13 +132,28 @@ function init() {
 		bot.y = newPos.newY;
 
 	};
-	bot.handleBCrumbFunction = function handleBCrumbFunction(fn, value){
+	bot.handleBCrumbFunction = function handleBCrumbFunction(fn, param){
 		if(bot.moving){ //Make sure the game is running
-			if (fn === "setOrientation"){
-					this.orientation = value;
+			
+			switch (fn){
+				case "setOrientation":
+						if (param){ //An orientation is provided
+							this.orientation = param; //Turn that direction
+						}
+					else {console.log("No orientation given!");}
+					break;
+				
+				case "pickUpItem":
+												
+						if (this.inventoryCap >= param.capacity){ //If it can be held
+								this.inventoryCap -= param.capacity; //Decrement the remaining bot capacity
+								this.inventory.push(param); //Put a copy of the item into inventory
+								this.bucks += param.bucks;  //Increment the bot's wallet
+						}
+						else {window.alert("No inventory space left");}
+						break;
 				}
-				else {console.log("No orientation given!");}
-		}
+			}
 	};
 
 	stage.addChild(bot);
@@ -165,6 +188,7 @@ function init() {
 		} else { //We end the program and reset the field
 			setTimeout(function() {
 			resetPlayground();
+			console.log("Bot AAR", bot);
 			},
 			250);
 		}
@@ -179,33 +203,54 @@ function init() {
 
 	(function(){
 
+		genBCrumbs();
+		genGoldCoins();
 //Generation of bCrumbs
+		
 
-				var cols = 2;
-				var rows = 4;
-				var l = 8;
-				var fns =  [["setOrientation", "n"], 
-							["setOrientation", "e"],
-							["setOrientation", "s"],
-							["setOrientation", "w"]
-							];
+		function genBCrumbs(){
+			var cols = 2;
+			var rows = 4;
+			var l = 8;
+			var fns =  [{task: "setOrientation", param: "n"},
+						{task: "setOrientation", param: "e"},
+						{task: "setOrientation", param: "s"},
+						{task: "setOrientation", param: "w"}
+						];
 
-				var labels = ["n", "e", "s", "w"];
+			var labels = ["n", "e", "s", "w"];
 
-				for(var i=0; i<l; i++) {
+			for(var i=0; i<l; i++) {
 				var myFn = fns[i % fns.length];
 				var myLabel = labels[i % labels.length];
 
-				var bCrumb = new BCrumb(myLabel, myFn, false); //(label, fn)
+				var bCrumb = new BCrumb(myLabel, myFn, true); //(label, fn, persistent?)
 					bCrumb.x = UNIT.width + UNIT.width * (i % cols);
 					bCrumb.y = UNIT.height + UNIT.height*Math.floor((i)/cols);
 					bCrumb.defaultPos = {x: bCrumb.x, y: bCrumb.y};
 					bCrumbs.addChild(bCrumb);
-				}
+			}
+		}
 
 //Generation of gold
+		function genGoldCoins(){
 
-				
+				var goldCoins = [{position: {x:2, y:3}, task: "pickUpItem", param: {itemName: "goldCoin", capacity: 1, bucks: 1}},
+								 {position: {x:4, y:6}, task: "pickUpItem", param: {itemName: "goldCoin", capacity: 1, bucks: 1}},
+								 {position: {x:8, y:8}, task: "pickUpItem", param: {itemName: "goldCoin", capacity: 1, bucks: 1}}
+								];
+				console.log("i", i);
+
+				for(var i=0; i<goldCoins.length; i++){
+					console.log("gcoins", goldCoins);
+					var goldCoin = new BCrumb("$", goldCoins[i], false); // (label, fn, persistent?)
+						goldCoin.x = CONTROLPANEL.width + UNIT.width * goldCoins[i].position.x;
+						goldCoin.y = UNIT.height * goldCoins[i].position.y;
+						goldCoin.defaultPos = {x : goldCoin.x, y: goldCoin.y};
+						bCrumbs.addChild(goldCoin);
+				}
+		}
+
 				stage.update();
 			})();
 	//Listeners
@@ -240,10 +285,13 @@ function init() {
 			var pt = hitBCrumb.localToLocal(UNIT.width*0.2, UNIT.height*0.2, bot); //Does a point in the middle of the bC hit the bot?
 				
 				if (hitBCrumb.hitTest(pt.x, pt.y)){
-					bot.handleBCrumbFunction(hitBCrumb.fn[0], hitBCrumb.fn[1]);
+					bot.handleBCrumbFunction(hitBCrumb.fn.task, hitBCrumb.fn.param);
 					console.log("currentFn", hitBCrumb.fn);
 					if (hitBCrumb.persistent === false){
 						resetBCrumb(hitBCrumb);
+						hitBCrumb.visible = false;
+						hitBCrumb.x = -100;
+						hitBCrumb.y = -100;
 					}
 					console.log("hit!!!!!");
 				}
