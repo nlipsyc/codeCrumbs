@@ -24,15 +24,24 @@ var STAGE = {
 	stage, bot, bCrumbs, goTime;
 	//Handlers
 
-	function handleSnap(cursorX, cursorY) { //Returns object {x: new x point, y: new y point}
+	function handlePxSnap(cursorX, cursorY) { //Returns object {x: new x point, y: new y point}
 		if (cursorX > CONTROLPANEL.width) { //Make sure we're still in the playground
-			var xSnapped = Math.round((cursorX - UNIT.width / 2) / UNIT.width) * UNIT.width; //Snaps to closest gird point.
+			var xSnapped = (Math.round((cursorX) / UNIT.width) * UNIT.width) + (UNIT.width*0.4); //Snaps to closest gird point.
 		
-			var ySnapped = Math.round((cursorY - UNIT.height / 2) / UNIT.height) * UNIT.height; //Snaps to closest gird point.
+			var ySnapped = (Math.round((cursorY) / UNIT.height) * UNIT.height) + (UNIT.height*0.4); //Snaps to closest gird point.
 			return {x: xSnapped, y: ySnapped}; //Return x,y snapped to closest unit
 		}
 						
 		return {x: cursorX, y: cursorY}; // If we are not in the playground, allow the breadcrumb to move freely
+	}
+
+	function handleGridPtSnap(gridX, gridY) { //Returns object {x: new x point, y: new y point}
+			var xSnapped = CONTROLPANEL.width + UNIT.width * gridX + (UNIT.width*0.4);//Snaps to closest gird point.
+		
+			var ySnapped = UNIT.height * gridY + (UNIT.height * 0.4); //Snaps to closest gird point.
+			console.log("grid point snap", xSnapped, ySnapped);
+			return {x: xSnapped, y: ySnapped}; //Return x,y snapped to closest unit
+						
 	}
 
 
@@ -63,9 +72,11 @@ var STAGE = {
 	//Reset bCrumb position
 			for (var i=0; i<bCrumbs.getNumChildren(); i++){
 				var bC = bCrumbs.getChildAt(i); //For each bC
-				BCFn.resetBCrumb(bC);
-				bC.visible = true;
+				if (bC.fn.task !== "setOrientation"){
+					BCFn.resetBCrumb(bC);
+					bC.visible = true;
 				}
+			}
 
 	//Reset bot position and stats
 		bot.moving = false;
@@ -135,9 +146,3 @@ function init() {
 		stage.update();
 	}
 }
-
-
-
-
-
-	
