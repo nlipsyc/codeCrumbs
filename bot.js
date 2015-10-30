@@ -34,6 +34,7 @@ BotFn.handleMoveForward = function handleMoveForward(dist, ori, x, y){ //Returns
 	};
 
 BotFn.handleBCrumbFunction = function handleBCrumbFunction(fn, param){
+		console.log("a");
 		if(bot.moving){ //Make sure the game is running
 			
 			switch (fn){
@@ -45,9 +46,7 @@ BotFn.handleBCrumbFunction = function handleBCrumbFunction(fn, param){
 					break;
 				
 				case "pickUpItem":
-								console.log('a');				
 						if (this.inventoryCap >= param.capacity){ //If it can be held
-							console.log('b');
 								this.inventoryCap -= param.capacity; //Decrement the remaining bot capacity
 								this.inventory.push(param); //Put a copy of the item into inventory
 								this.bucks += param.bucks;  //Increment the bot's wallet

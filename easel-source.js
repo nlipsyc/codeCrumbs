@@ -21,7 +21,13 @@ var STAGE = {
 	},
 	ticker = createjs.Ticker,
 	BCFn = BC,
-	stage, bot, bCrumbs, goTime;
+	stage, infoTxt, bot, bCrumbs, goTime,
+	winCond = function (){if (bot.bucks >= 2){
+							return true;
+						}
+						return false;
+	};
+
 	//Handlers
 
 	function handlePxSnap(cursorX, cursorY) { //Returns object {x: new x point, y: new y point}
@@ -39,7 +45,6 @@ var STAGE = {
 			var xSnapped = CONTROLPANEL.width + UNIT.width * gridX + (UNIT.width*0.4);//Snaps to closest gird point.
 		
 			var ySnapped = UNIT.height * gridY + (UNIT.height * 0.4); //Snaps to closest gird point.
-			console.log("grid point snap", xSnapped, ySnapped);
 			return {x: xSnapped, y: ySnapped}; //Return x,y snapped to closest unit
 						
 	}
@@ -96,17 +101,30 @@ function init() {
 	stage.mouseMoveOutside = true;
 
 	stage.enableMouseOver();
-
-	console.log("Bot", bot, "BCrumb", BCrumb);
-
+	
 	bot = new Bot();
 	stage.addChild(bot);
 
 	bCrumbs = BCFn.genBCrumbs();
 	stage.addChild(bCrumbs);
+			console.log("bcrumbs", bCrumbs);
+
 
 	goTime = new GoTime();
 	stage.addChild(goTime);
+
+	infoTxt = new createjs.Text("", "bold 18px Arial", "#00000");
+			infoTxt.name = "infoTxt";
+			infoTxt.lineWidth = PLAYGROUND.width * 0.6;
+			infoTxt.textAlign = "center";
+			infoTxt.x = 500;//CONTROLPANEL.width;
+			infoTxt.y = 50;
+			infoTxt.textBaseline = "left";
+			infoTxt.mission = "Collect 2 gold coins";
+			infoTxt.text = "Mission: "+ infoTxt.mission + "  Inventory: " + bot.inventoryCap + "  $: " + bot.bucks;
+	stage.addChild(infoTxt);
+
+	///Win condition
 
 	stage.update();
 
@@ -129,8 +147,7 @@ function init() {
 		for (var i=0; i<l; i++){
 			var hitBCrumb = bCrumbs.getChildAt(i); //For each bC
 
-			var pt = hitBCrumb.localToLocal(UNIT.width*0.2, UNIT.height*0.2, bot); //Does a point in the middle of the bC hit the bot?
-				
+			var pt = hitBCrumb.localToLocal(-0.2 * UNIT.width, -0.2*UNIT.height, bot); //Does a point in the middle of the bC hit the bot?
 				if (hitBCrumb.hitTest(pt.x, pt.y)){									 //If a crumb is hit
 					bot.handleBCrumbFunction(hitBCrumb.fn.task, hitBCrumb.fn.param); //Handle the function
 					console.log("currentFn", hitBCrumb.fn);							 
@@ -140,8 +157,17 @@ function init() {
 						hitBCrumb.x = -100;
 						hitBCrumb.y = -100;
 					}
+
+					infoTxt.text = "Mission: "+ infoTxt.mission + "  Inventory: " + bot.inventoryCap + "  $: " + bot.bucks;	//Update the infoTxt
+					
 					console.log("hit!!!!!");
 				}
+		}
+
+		//Win condition
+		if (winCond()){
+			window.alert("You win!");
+			goTime.handleGoTime();
 		}
 		stage.update();
 	}

@@ -6,6 +6,7 @@
 		this.x = STAGE.width - UNIT.height;
 		this.y = UNIT.height;
 		this.progRunning = false;
+		this.handleGoTime = (function() {handleGoTime(); });
 		this.on("click", function() {
 			handleGoTime();
 		});
@@ -37,14 +38,10 @@
 		if (!goTime.progRunning) { //We start the program
 			bot.moving = true;
 		} else { //We end the program and reset the field
-			setTimeout(function() {
 			console.log("Bot AAR", bot);
 			resetPlayground();
-			
-			},
-			250);
-		}
-
+			}
+		
 		goTime.progRunning = !goTime.progRunning;
 		}
 
