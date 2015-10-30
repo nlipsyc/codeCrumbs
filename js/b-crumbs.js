@@ -8,12 +8,10 @@
 		this.fn = fn;
 		this.persistent = persistent;
 		this.on("pressmove", function(evt) {
-			if (true){//this.fn.task === "setOrientation" && !goTime.progRunning){ //Don't move gold coins, or anything while it's running
+			if (this.fn.task === "setOrientation" && !goTime.progRunning){ //Don't move gold coins, or anything while it's running
 				var snapped = handlePxSnap(evt.stageX, evt.stageY);
-				//	if (!goTime.progRunning){ ******Need to lock this so it only happens when game is paused****
 					evt.currentTarget.x = snapped.x;
 					evt.currentTarget.y = snapped.y;
-				//	}
 				}
 			});
 

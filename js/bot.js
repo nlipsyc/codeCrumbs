@@ -71,6 +71,13 @@ BotFn.handleBCrumbFunction = function handleBCrumbFunction(fn, param){
 		
 		this.moveForward = BotFn.moveForward;
 		this.handleBCrumbFunction = BotFn.handleBCrumbFunction;
+
+		this.on("click", function() {
+			levelNumber++;
+			console.log("levelNumber", levelNumber);
+			lv = ["l" + levelNumber]; //level
+
+		});
 	}
 
 	var b = createjs.extend(Bot, createjs.Shape);
