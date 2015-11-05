@@ -52,11 +52,11 @@ var STAGE = {
 
 
 	function isOnStage(shape){ //runs checks for each boundary and logs failure
-		if (shape.x > STAGE.width-UNIT.width){
+		if (shape.x > STAGE.width){
 			console.log("Right edge hit");
 			return false;
 		}
-		else if(shape.x < CONTROLPANEL + UNIT.width){
+		else if(shape.x < CONTROLPANEL){
 			console.log("Left edge hit");
 			return false;
 		}
@@ -64,7 +64,7 @@ var STAGE = {
 			console.log("Top edge hit");
 			return false;
 		}
-		else if (shape.y > STAGE.height - UNIT.height){
+		else if (shape.y > STAGE.height){
 			console.log("Bottom edge hit");
 			return false;
 		}
@@ -101,13 +101,16 @@ function init() {
 	stage.mouseMoveOutside = true;
 
 	stage.enableMouseOver();
-	
+
+	home = new Home();
+	stage.addChild(home);
+
 	bot = new Bot();
 	stage.addChild(bot);
 
 	bCrumbs = BCFn.genBCrumbs();
 	stage.addChild(bCrumbs);
-			console.log("bcrumbs", bCrumbs);
+			console.log("bcrumbs2", bCrumbs.getChildAt(2));
 
 
 	goTime = new GoTime();
@@ -147,15 +150,16 @@ function init() {
 		for (var i=0; i<l; i++){
 			var hitBCrumb = bCrumbs.getChildAt(i); //For each bC
 
-			var pt = hitBCrumb.localToLocal(-0.2 * UNIT.width, -0.2*UNIT.height, bot); //Does a point in the middle of the bC hit the bot?
-				if (hitBCrumb.hitTest(pt.x, pt.y)){									 //If a crumb is hit
-					bot.handleBCrumbFunction(hitBCrumb.fn.task, hitBCrumb.fn.param); //Handle the function
-					console.log("currentFn", hitBCrumb.fn);							 
-					if (hitBCrumb.persistent === false){							 //If not persistent, remove from screen
-						BCFn.resetBCrumb(hitBCrumb);
-						hitBCrumb.visible = false;
-						hitBCrumb.x = -100;
-						hitBCrumb.y = -100;
+			var bc = hitBCrumb.localToLocal(-0.2 * UNIT.width, -0.2*UNIT.height, bot); //Does a point in the middle of the bC hit the bot?
+				if (hitBCrumb.hitTest(bc.x, bc.y)){	
+				console.log(bc);								 //If a crumb is hit
+						bot.handleBCrumbFunction(hitBCrumb.fn.task, hitBCrumb.fn.param); //Handle the function
+						console.log("currentFn", hitBCrumb.fn);							 
+						if (hitBCrumb.persistent === false){							 //If not persistent, remove from screen
+							BCFn.resetBCrumb(hitBCrumb);
+							hitBCrumb.visible = false;
+							hitBCrumb.x = -100;
+							hitBCrumb.y = -100;
 					}
 
 					infoTxt.text = "Mission: "+ infoTxt.mission + "  Inventory: " + bot.inventoryCap + "  $: " + bot.bucks;	//Update the infoTxt
@@ -163,6 +167,18 @@ function init() {
 					console.log("hit!!!!!");
 				}
 		}
+
+		//Has bot hit the Home
+
+		// console.log(home.localToLocal(0.2 * UNIT.width, 0.7 *UNIT.height, bot));
+		var hm = home.localToLocal(0.4*UNIT.width, 1.2*UNIT.height, bot);
+			if (home.hitTest(hm.x, hm.y)){
+				console.log("home hit");
+				bot.handleHomeHit();
+			}
+
+
+		//**********Hit test for home here, incl bot.orientation + unload cargo
 
 		//Win condition
 		if (winCond()){

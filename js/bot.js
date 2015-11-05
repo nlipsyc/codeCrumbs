@@ -34,7 +34,6 @@ BotFn.handleMoveForward = function handleMoveForward(dist, ori, x, y){ //Returns
 	};
 
 BotFn.handleBCrumbFunction = function handleBCrumbFunction(fn, param){
-		console.log("a");
 		if(bot.moving){ //Make sure the game is running
 			
 			switch (fn){
@@ -57,6 +56,17 @@ BotFn.handleBCrumbFunction = function handleBCrumbFunction(fn, param){
 			}
 	};
 
+BotFn.handleHomeHit = function hanldleHomeHit(){
+	if (bot.moving){ //If game is running
+		home.inventory.push(bot.inventory); //Home absorbs all the bot's goodies
+		home.bucks += bot.bucks;
+
+		bot.orientation = home.orientation; //Points the bot in the right direction
+		bot.inventory = [];					//And empties it out
+		bot.bucks = 0;
+		}
+	};
+
 	//Class declaration
 		this.Shape_constructor();
 		this.graphics.beginFill("gray").drawRoundRect(0, 0, UNIT.width * 0.8, UNIT.height * 0.8, 5);
@@ -71,13 +81,8 @@ BotFn.handleBCrumbFunction = function handleBCrumbFunction(fn, param){
 		
 		this.moveForward = BotFn.moveForward;
 		this.handleBCrumbFunction = BotFn.handleBCrumbFunction;
-
-		this.on("click", function() {
-			levelNumber++;
-			console.log("levelNumber", levelNumber);
-			lv = ["l" + levelNumber]; //level
-
-		});
+		this.handleHomeHit = BotFn.handleHomeHit;
+	//	});
 	}
 
 	var b = createjs.extend(Bot, createjs.Shape);
