@@ -30,21 +30,21 @@ var STAGE = {
 
 	//Handlers
 
-	function handlePxSnap(cursorX, cursorY) { //Returns object {x: new x point, y: new y point}
+	function handlePxSnap(cursorX, cursorY) { //For use with non-grid-snapped elements Returns object {x: new x point, y: new y point}
 		if (cursorX > CONTROLPANEL.width) { //Make sure we're still in the playground
-			var xSnapped = (Math.round((cursorX) / UNIT.width) * UNIT.width) + (UNIT.width*0.4); //Snaps to closest gird point.
+			var xSnapped = (Math.round((cursorX) / UNIT.width) * UNIT.width); //Snaps to closest gird point.
 		
-			var ySnapped = (Math.round((cursorY) / UNIT.height) * UNIT.height) + (UNIT.height*0.4); //Snaps to closest gird point.
+			var ySnapped = (Math.round((cursorY) / UNIT.height) * UNIT.height); //Snaps to closest gird point.
 			return {x: xSnapped, y: ySnapped}; //Return x,y snapped to closest unit
 		}
 						
 		return {x: cursorX, y: cursorY}; // If we are not in the playground, allow the breadcrumb to move freely
 	}
 
-	function handleGridPtSnap(gridX, gridY) { //Returns object {x: new x point, y: new y point}
-			var xSnapped = CONTROLPANEL.width + UNIT.width * gridX + (UNIT.width*0.4);//Snaps to closest gird point.
+	function handleGridPtSnap(gridX, gridY) { //For use with grid-snapped elements Returns object {x: new x point, y: new y point}
+			var xSnapped = CONTROLPANEL.width + UNIT.width * gridX;//Snaps to closest gird point.
 		
-			var ySnapped = UNIT.height * gridY + (UNIT.height * 0.4); //Snaps to closest gird point.
+			var ySnapped = UNIT.height * gridY; //Snaps to closest gird point.
 			return {x: xSnapped, y: ySnapped}; //Return x,y snapped to closest unit
 						
 	}
@@ -110,8 +110,6 @@ function init() {
 
 	bCrumbs = BCFn.genBCrumbs();
 	stage.addChild(bCrumbs);
-			console.log("bcrumbs2", bCrumbs.getChildAt(2));
-
 
 	goTime = new GoTime();
 	stage.addChild(goTime);
@@ -146,34 +144,44 @@ function init() {
 		
 
 		//Has bot hit a bCrumb?
+
+		function notTooSoon(lastHit){
+			console.log("lasthit", lastHit, "tickertime", ticker.getTime());
+			if( lastHit + 75 < ticker.getTime()){
+				return true;
+			}
+			else {
+				return false;
+
+			}
+		}
 		var l = bCrumbs.getNumChildren(); //Get number of bCrumbs
 		for (var i=0; i<l; i++){
 			var hitBCrumb = bCrumbs.getChildAt(i); //For each bC
 
-			var bc = hitBCrumb.localToLocal(-0.2 * UNIT.width, -0.2*UNIT.height, bot); //Does a point in the middle of the bC hit the bot?
-				if (hitBCrumb.hitTest(bc.x, bc.y)){	
-				console.log(bc);								 //If a crumb is hit
+			var bc = hitBCrumb.localToLocal(UNIT.width*0.4, UNIT.height*0.4, bot);//(-0.2 * UNIT.width, -0.2*UNIT.height, bot); //Does a point in the middle of the bC hit the bot?
+				if (hitBCrumb.hitTest(bc.x, bc.y) && notTooSoon(hitBCrumb.lastHit)){	//If a crumb is hit and this was not just executed
+				console.log("Breadcrumb hit", bc);
+					
 						bot.handleBCrumbFunction(hitBCrumb.fn.task, hitBCrumb.fn.param); //Handle the function
-						console.log("currentFn", hitBCrumb.fn);							 
-						if (hitBCrumb.persistent === false){							 //If not persistent, remove from screen
+						hitBCrumb.lastHit = ticker.getTime();
+						console.log("currentFn", hitBCrumb.fn, "bot", bot);
+						if (hitBCrumb.persistent === false){	//If not persistent, remove from screen
 							BCFn.resetBCrumb(hitBCrumb);
 							hitBCrumb.visible = false;
 							hitBCrumb.x = -100;
 							hitBCrumb.y = -100;
 					}
 
-					infoTxt.text = "Mission: "+ infoTxt.mission + "  Inventory: " + bot.inventoryCap + "  $: " + bot.bucks;	//Update the infoTxt
-					
-					console.log("hit!!!!!");
+					infoTxt.text = "Mission: "+ infoTxt.mission + "  Inventory: " + bot.inventoryCap + "  $: " + bot.bucks;	//Update the infoTxt					
 				}
 		}
 
 		//Has bot hit the Home
 
 		// console.log(home.localToLocal(0.2 * UNIT.width, 0.7 *UNIT.height, bot));
-		var hm = home.localToLocal(0.4*UNIT.width, 1.2*UNIT.height, bot);
+		var hm = home.localToLocal(UNIT.width*0.5, UNIT.height*0.5, bot);
 			if (home.hitTest(hm.x, hm.y)){
-				console.log("home hit");
 				bot.handleHomeHit();
 			}
 

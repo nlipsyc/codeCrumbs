@@ -7,6 +7,7 @@
 		this.label = label;
 		this.fn = fn;
 		this.persistent = persistent;
+		this.lastHit = 0;
 		this.on("pressmove", function(evt) {
 			if (this.fn.task === "setOrientation" && !goTime.progRunning){ //Don't move gold coins, or anything while it's running
 				var snapped = handlePxSnap(evt.stageX, evt.stageY);
@@ -14,22 +15,23 @@
 					evt.currentTarget.y = snapped.y;
 				}
 			});
-
 		this.setup(colours);
 		}
 	var b = createjs.extend(BCrumb, createjs.Container);
 
 	b.setup = function(colours){
 		var bcBkg = new createjs.Shape();
-			bcBkg.graphics.beginFill(colours.fill).dc(0,0, UNIT.width*0.4);
+			bcBkg.graphics.beginFill(colours.fill).dc(UNIT.width*0.4, UNIT.height*0.4, UNIT.width*0.4);
 
 		var bcLabel = new createjs.Text(this.label, "bold 18px Arial", colours.text);
 			bcLabel.name = this.label;
 			bcLabel.textAlign = "center";
-			bcLabel.y = -UNIT.width*0.2;
+			bcLabel.x = UNIT.width*0.4;
+			bcLabel.y = UNIT.height*0.2;
 			textBaseline = "center";
 
 		this.addChild(bcBkg, bcLabel);
+		this.alpha = 0.8;
 	};
 
 		window.BCrumb = createjs.promote(BCrumb, "Container");
@@ -94,7 +96,7 @@ var BC = {};
 				goldCoin.y = goldCoin.defaultPos.y;
 				bCrumbs.addChild(goldCoin);
 		}}
-			genFnBCrumbs();
 			genGoldCoins();
+			genFnBCrumbs();
 			return bCrumbs;
 	};

@@ -32,16 +32,40 @@ BotFn.handleMoveForward = function handleMoveForward(dist, ori, x, y){ //Returns
 			console.log("Error: Bot orientation property \""+ ori + "\" is invalid");
 		}
 	};
+function onGridPoint(x, y){ //Are x and y within 5px of a grid point
+	var sP = handlePxSnap(x, y); //Nearest gird point
+
+	console.log("x", Math.abs(sP.x-x), "y", Math.abs(sP.y-y));
+
+	if (Math.abs(sP.x-x) < 15 && Math.abs(sP.y-y) < 15){
+		return true;
+	}
+	return false;
+}
 
 BotFn.handleBCrumbFunction = function handleBCrumbFunction(fn, param){
 		if(bot.moving){ //Make sure the game is running
-			
+		console.log("bot.handlebcrumbfunction", fn, param);
 			switch (fn){
 				case "setOrientation":
+				console.log("a");
 						if (param){ //An orientation is provided
-							this.orientation = param; //Turn that direction
-						}
-					else {console.log("No orientation given!");}
+							console.log("b");
+								//if (onGridPoint(bot.x, bot.y)){
+									console.log("c");
+									var snapBot = handlePxSnap(bot.x, bot.y);
+									bot.x = snapBot.x;
+									bot.y = snapBot.y;
+									this.orientation = param; //Turn that direction
+								// }
+								// else {
+								// 	console.log("else!!!!");
+								// 	setTimeout(function() {handleBCrumbFunction(fn, param);}, 100);
+									
+								// }
+					}
+						else {console.log("No orientation given!");}
+				
 					break;
 				
 				case "pickUpItem":
@@ -69,8 +93,8 @@ BotFn.handleHomeHit = function hanldleHomeHit(){
 
 	//Class declaration
 		this.Shape_constructor();
-		this.graphics.beginFill("gray").drawRoundRect(0, 0, UNIT.width * 0.8, UNIT.height * 0.8, 5);
-		this.defaultPos = {x: CONTROLPANEL.width, y: STAGE.height - UNIT.height};
+		this.graphics.beginFill("gray").drawRoundRect(0, 0, UNIT.width * 0.8, UNIT.height * 0.8, 5); // x  y  w  h  radius 
+		this.defaultPos = handlePxSnap(CONTROLPANEL.width, STAGE.height - UNIT.height);
 		this.x = this.defaultPos.x;
 		this.y = this.defaultPos.y;
 		this.inventory = [];
