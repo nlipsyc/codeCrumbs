@@ -22,7 +22,7 @@ var STAGE = {
 	ticker = createjs.Ticker,
 	BCFn = BC,
 	stage, infoTxt, bot, bCrumbs, goTime,
-	winCond = function (){if (bot.bucks >= 2){
+	winCond = function (){if (home.bucks >= 2){
 							return true;
 						}
 						return false;
@@ -92,6 +92,11 @@ var STAGE = {
 		bot.bucks = 0;
 		bot.orientation = "e";
 		bot.currentFunction = null;
+
+	//Reset home
+		home.orientation = "e";
+		home.inventory = [];
+		home.bucks = 0;
 	}
 
 function init() {
@@ -117,12 +122,14 @@ function init() {
 	infoTxt = new createjs.Text("", "bold 18px Arial", "#00000");
 			infoTxt.name = "infoTxt";
 			infoTxt.lineWidth = PLAYGROUND.width * 0.6;
-			infoTxt.textAlign = "center";
-			infoTxt.x = 500;//CONTROLPANEL.width;
+			infoTxt.textAlign = "left";
+			infoTxt.x = 350;//CONTROLPANEL.width;
 			infoTxt.y = 50;
 			infoTxt.textBaseline = "left";
 			infoTxt.mission = "Collect 2 gold coins";
-			infoTxt.text = "Mission: "+ infoTxt.mission + "  Inventory: " + bot.inventoryCap + "  $: " + bot.bucks;
+			infoTxt.default = "Mission: "+ infoTxt.mission + "  Inventory Remaining: " + bot.inventoryCap + "                    $ at Home: " + home.bucks;
+			infoTxt.win = "You win!!!";
+			infoTxt.text = infoTxt.default;
 	stage.addChild(infoTxt);
 
 	///Win condition
@@ -173,7 +180,7 @@ function init() {
 							hitBCrumb.y = -100;
 					}
 
-					infoTxt.text = "Mission: "+ infoTxt.mission + "  Inventory: " + bot.inventoryCap + "  $: " + bot.bucks;	//Update the infoTxt					
+					infoTxt.text = "Mission: "+ infoTxt.mission + "  Inventory: " + bot.inventoryCap + "  $ at home: " + home.bucks;	//Update the infoTxt					
 				}
 		}
 
@@ -190,7 +197,12 @@ function init() {
 
 		//Win condition
 		if (winCond()){
-			window.alert("You win!");
+			infoTxt.text = infoTxt.win;
+			infoTxt.color = "green";
+			setTimeout(function() {
+				infoTxt.text = infoTxt.default;
+				infoTxt.color = "black";
+			}, 1000);
 			goTime.handleGoTime();
 		}
 		stage.update();
