@@ -59,13 +59,8 @@ var BC = {};
 			var cols = 2;
 			var rows = 4;
 			var l = 8;
-			var fns =  [{task: "setOrientation", param: "n"},
-						{task: "setOrientation", param: "e"},
-						{task: "setOrientation", param: "s"},
-						{task: "setOrientation", param: "w"}
-						];
-
-			var labels = ["n", "e", "s", "w"];
+			var fns =  lr.FnBCrumbs.fns;
+			var labels = lr.FnBCrumbs.labels;
 
 			for(var i=0; i<l; i++) {
 				var myFn = fns[i % fns.length];
@@ -84,10 +79,7 @@ var BC = {};
 		var goldCoins = new createjs.Container();
 			goldCoins.name = "goldCoins";
 
-		var coins = [{position: {x: 2, y: 3}, fns: {task: "pickUpItem", param: {itemName: "goldCoin", capacity: 1, bucks: 1}}},
-					 {position: {x: 4, y: 6}, fns: {task: "pickUpItem", param: {itemName: "goldCoin", capacity: 1, bucks: 1}}},
-					 {position: {x: 8, y: 8}, fns: {task: "pickUpItem", param: {itemName: "goldCoin", capacity: 1, bucks: 1}}}
-						];
+		var coins = lr.goldCoins;
 
 		for(var i=0; i<coins.length; i++){
 			var goldCoin = new BCrumb("$", coins[i].fns, false, {fill: "yellow", text: "black"}); // (label, fn, persistent?)

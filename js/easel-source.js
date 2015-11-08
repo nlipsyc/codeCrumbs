@@ -21,13 +21,12 @@ var STAGE = {
 	},
 	ticker = createjs.Ticker,
 	BCFn = BC,
+	level = 1,
+	lr =l1, //level resources
 	stage, infoTxt, bot, bCrumbs, goTime,
-	winCond = function (){if (home.bucks >= 2){
-							return true;
-						}
-						return false;
-	};
+	winCond = lr.winCond;
 
+console.log("lr", lr);
 	//Handlers
 
 	function handlePxSnap(cursorX, cursorY) { //For use with non-grid-snapped elements Returns object {x: new x point, y: new y point}
@@ -98,6 +97,10 @@ var STAGE = {
 		home.inventory = [];
 		home.bucks = 0;
 	}
+/********** @todo once back make sure level changes will re-eval all the variables. Right now it leaves lr undefined***/
+	function setLevel(){
+		lr = this["l" + level];
+	}
 
 function init() {
 	stage = new createjs.Stage("demoCanvas");
@@ -106,6 +109,8 @@ function init() {
 	stage.mouseMoveOutside = true;
 
 	stage.enableMouseOver();
+
+	setLevel();
 
 	home = new Home();
 	stage.addChild(home);
@@ -126,8 +131,10 @@ function init() {
 			infoTxt.x = 350;//CONTROLPANEL.width;
 			infoTxt.y = 50;
 			infoTxt.textBaseline = "left";
-			infoTxt.mission = "Collect 2 gold coins";
-			infoTxt.default = "Mission: "+ infoTxt.mission + "  Inventory Remaining: " + bot.inventoryCap + "                    $ at Home: " + home.bucks;
+			infoTxt.mission = lr.infoTxt.mission;
+			infoTxt.default = "Mission: "+ infoTxt.mission + 
+								"  Inventory Remaining: " + bot.inventoryCap +
+								"                    $ at Home: " + home.bucks;
 			infoTxt.win = "You win!!!";
 			infoTxt.text = infoTxt.default;
 	stage.addChild(infoTxt);
@@ -204,6 +211,11 @@ function init() {
 				infoTxt.color = "black";
 			}, 1000);
 			goTime.handleGoTime();
+			level++;
+			console.log("level", level);
+			setLevel();
+			console.log("lr", lr);
+			setTimeout(function() {init();}, 1000);
 		}
 		stage.update();
 	}
