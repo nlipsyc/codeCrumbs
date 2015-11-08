@@ -75,10 +75,11 @@ console.log("lr", lr);
 	function resetPlayground(){
 	//Reset bCrumb position
 			for (var i=0; i<bCrumbs.getNumChildren(); i++){
-				var bC = bCrumbs.getChildAt(i); //For each bC
+				var bC = bCrumbs.getChildAt(i); //For each 
+					bC.persistent = bC.defaultPersistent;
+					bC.visible = true;
 				if (bC.fn.task !== "setOrientation"){
 					BCFn.resetBCrumb(bC);
-					bC.visible = true;
 				}
 			}
 
@@ -96,6 +97,9 @@ console.log("lr", lr);
 		home.orientation = "e";
 		home.inventory = [];
 		home.bucks = 0;
+
+	//Reset infoTxt
+	infoTxt.update();
 	}
 /********** @todo once back make sure level changes will re-eval all the variables. Right now it leaves lr undefined***/
 	function setLevel(){
@@ -132,11 +136,15 @@ function init() {
 			infoTxt.y = 50;
 			infoTxt.textBaseline = "left";
 			infoTxt.mission = lr.infoTxt.mission;
-			infoTxt.default = "Mission: "+ infoTxt.mission + 
+			infoTxt.update = (function(){
+								infoTxt.text=
+								"Mission: "+ infoTxt.mission +
 								"  Inventory Remaining: " + bot.inventoryCap +
 								"                    $ at Home: " + home.bucks;
+								});
 			infoTxt.win = "You win!!!";
-			infoTxt.text = infoTxt.default;
+			infoTxt.text ="";
+			infoTxt.update();
 	stage.addChild(infoTxt);
 
 	///Win condition
@@ -160,8 +168,8 @@ function init() {
 		//Has bot hit a bCrumb?
 
 		function notTooSoon(lastHit){
-			console.log("lasthit", lastHit, "tickertime", ticker.getTime());
-			if( lastHit + 75 < ticker.getTime()){
+			console.log("diff", ticker.getTime() - lastHit, "lasthit", lastHit, "tickertime", ticker.getTime());
+			if( lastHit + 100 < ticker.getTime()){
 				return true;
 			}
 			else {
@@ -176,18 +184,19 @@ function init() {
 			var bc = hitBCrumb.localToLocal(UNIT.width*0.4, UNIT.height*0.4, bot);//(-0.2 * UNIT.width, -0.2*UNIT.height, bot); //Does a point in the middle of the bC hit the bot?
 				if (hitBCrumb.hitTest(bc.x, bc.y) && notTooSoon(hitBCrumb.lastHit)){	//If a crumb is hit and this was not just executed
 				console.log("Breadcrumb hit", bc);
-					
-						bot.handleBCrumbFunction(hitBCrumb.fn.task, hitBCrumb.fn.param); //Handle the function
-						hitBCrumb.lastHit = ticker.getTime();
-						console.log("currentFn", hitBCrumb.fn, "bot", bot);
-						if (hitBCrumb.persistent === false){	//If not persistent, remove from screen
-							BCFn.resetBCrumb(hitBCrumb);
-							hitBCrumb.visible = false;
-							hitBCrumb.x = -100;
-							hitBCrumb.y = -100;
+					if (hitBCrumb.visible === true){
+							bot.handleBCrumbFunction(hitBCrumb.fn.task, hitBCrumb.fn.param); //Handle the function
+							hitBCrumb.lastHit = ticker.getTime(); //Stop double triggering of bcrumb
+							hitBCrumb.persistent--; //Tick down the number of time it can be hit
+							console.log("currentFn", hitBCrumb.fn, "bot", bot);
+							if (hitBCrumb.persistent <= 0){	//If not persistent, remove from screen
+								//BCFn.resetBCrumb(hitBCrumb);
+								hitBCrumb.visible = false;
+								// hitBCrumb.x = -100;
+								// hitBCrumb.y = -100;
+						}
 					}
-
-					infoTxt.text = "Mission: "+ infoTxt.mission + "  Inventory: " + bot.inventoryCap + "  $ at home: " + home.bucks;	//Update the infoTxt					
+					infoTxt.update();
 				}
 		}
 

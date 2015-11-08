@@ -59,17 +59,18 @@ var BC = {};
 			var cols = 2;
 			var rows = 4;
 			var l = 8;
-			var fns =  lr.FnBCrumbs.fns;
-			var labels = lr.FnBCrumbs.labels;
+			var fns =  lr.FnBCrumbs;
 
 			for(var i=0; i<l; i++) {
-				var myFn = fns[i % fns.length];
-				var myLabel = labels[i % labels.length];
+				var myFn = fns[i % fns.length].fns;
+				var myLabel = fns[i % fns.length].label;
+				var myPersistent = fns[i % fns.length].persistent;
 
-				var bCrumb = new BCrumb(myLabel, myFn, true, {fill: "#123456", text: "#FFFFFF"}); //(label, fn, persistent?)
+				var bCrumb = new BCrumb(myLabel, myFn, myPersistent, {fill: "#123456", text: "#FFFFFF"}); //(label, fn, persistent?)
 					bCrumb.x = UNIT.width + UNIT.width * (i % cols);
 					bCrumb.y = UNIT.height + UNIT.height*Math.floor((i)/cols);
 					bCrumb.defaultPos = {x: bCrumb.x, y: bCrumb.y};
+					bCrumb.defaultPersistent = bCrumb.persistent;
 					bCrumbs.addChild(bCrumb);
 			}
 		}
@@ -82,8 +83,9 @@ var BC = {};
 		var coins = lr.goldCoins;
 
 		for(var i=0; i<coins.length; i++){
-			var goldCoin = new BCrumb("$", coins[i].fns, false, {fill: "yellow", text: "black"}); // (label, fn, persistent?)
+			var goldCoin = new BCrumb("$", coins[i].fns, coins[i].persistent, {fill: "yellow", text: "black"}); // (label, fn, persistent?)
 				goldCoin.defaultPos = handleGridPtSnap(coins[i].position.x, coins[i].position.y);
+				goldCoin.defaultPersistent = goldCoin.persistent;
 				goldCoin.x = goldCoin.defaultPos.x;
 				goldCoin.y = goldCoin.defaultPos.y;
 				bCrumbs.addChild(goldCoin);
