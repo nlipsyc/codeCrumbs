@@ -50,11 +50,11 @@ var BC = {};
 		};
 			
 
-	BC.genBCrumbs = function genBCrumbs(){
+	BC.genBCrumbs = function genBCrumbs(){ 
 		var bCrumbs = new createjs.Container();
 		bCrumbs.name = "bCrumbs";
 
-		function genFnBCrumbs(){
+		function genFnBCrumbs(){  //BCrumb(label, fn, persistent, colours)
 
 			var cols = 2;
 			var rows = 4;
@@ -83,6 +83,7 @@ var BC = {};
 		var coins = lr.goldCoins;
 
 		for(var i=0; i<coins.length; i++){
+			console.log("gc buildup persistent", coins[i]);
 			var goldCoin = new BCrumb("$", coins[i].fns, coins[i].persistent, {fill: "yellow", text: "black"}); // (label, fn, persistent?)
 				goldCoin.defaultPos = handleGridPtSnap(coins[i].position.x, coins[i].position.y);
 				goldCoin.defaultPersistent = goldCoin.persistent;

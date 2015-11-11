@@ -103,7 +103,9 @@ console.log("lr", lr);
 	}
 /********** @todo once back make sure level changes will re-eval all the variables. Right now it leaves lr undefined***/
 	function setLevel(){
+		console.log(level);
 		lr = this["l" + level];
+		console.log("lr", lr);
 	}
 
 function init() {
@@ -183,12 +185,11 @@ function init() {
 
 			var bc = hitBCrumb.localToLocal(UNIT.width*0.4, UNIT.height*0.4, bot);//(-0.2 * UNIT.width, -0.2*UNIT.height, bot); //Does a point in the middle of the bC hit the bot?
 				if (hitBCrumb.hitTest(bc.x, bc.y) && notTooSoon(hitBCrumb.lastHit)){	//If a crumb is hit and this was not just executed
-				console.log("Breadcrumb hit", bc);
+				console.log("Breadcrumb hit", hitBCrumb);
 					if (hitBCrumb.visible === true){
 							bot.handleBCrumbFunction(hitBCrumb.fn.task, hitBCrumb.fn.param); //Handle the function
 							hitBCrumb.lastHit = ticker.getTime(); //Stop double triggering of bcrumb
 							hitBCrumb.persistent--; //Tick down the number of time it can be hit
-							console.log("currentFn", hitBCrumb.fn, "bot", bot);
 							if (hitBCrumb.persistent <= 0){	//If not persistent, remove from screen
 								//BCFn.resetBCrumb(hitBCrumb);
 								hitBCrumb.visible = false;
@@ -222,7 +223,6 @@ function init() {
 			goTime.handleGoTime();
 			level++;
 			console.log("level", level);
-			setLevel();
 			console.log("lr", lr);
 			setTimeout(function() {init();}, 1000);
 		}
